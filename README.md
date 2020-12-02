@@ -31,10 +31,10 @@ pre verziu 1.0:
 ## Nosná časť kódu pre spínanie relé:
 [Michaela Merz](https://www.hackster.io/mischmerz)   
 
-byte relON[] = {0xA0, 0x01, 0x01, 0xA2};  //Hex command to send to serial for open relay
-byte relOFF[] = {0xA0, 0x01, 0x00, 0xA1}; //Hex command to send to serial for close relay
-Serial.begin(9600);
-Serial.write(relON, sizeof(relON)); // turns the relay
+byte relON[] = {0xA0, 0x01, 0x01, 0xA2};  //Hex command to send to serial for open relay      
+byte relOFF[] = {0xA0, 0x01, 0x00, 0xA1}; //Hex command to send to serial for close relay     
+Serial.begin(9600);      
+Serial.write(relON, sizeof(relON)); // turns the relay     
 
 This works perfectly on a ESP8266 (Arduino environment).
 

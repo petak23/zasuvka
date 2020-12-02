@@ -1,26 +1,35 @@
 /* 
  * Program pre zásuvku spínanú cez relé pomocou ESP8266 a MQTT pre IoT
  *
- * Posledna zmena(last change): 01.12.2020
+ * Posledna zmena(last change): 02.12.2020
  * @author Ing. Peter VOJTECH ml. <petak23@gmail.com>
  * @copyright  Copyright (c) 2016 - 2020 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version 1.0.1
+ * @version 1.0.2
+ * 
+ * @help https://www.hackster.io/makerrelay/esp8266-wifi-5v-1-channel-relay-delay-module-iot-smart-home-e8a437 - v diskusii:
+ * Michaela Merz 3 years ago
+ * byte relON[] = {0xA0, 0x01, 0x01, 0xA2}; //Hex command to send to serial for open relay
+ * byte relOFF[] = {0xA0, 0x01, 0x00, 0xA1}; //Hex command to send to serial for close relay
+ * Serial.begin(9600);
+ * Serial.write(relON, sizeof(relON)); // turns the relay
+ *
+ * This works perfectly on a ESP8266 (Arduino environment).
  */
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <PubSubClient.h>
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>
 #include "definitions.h"
 
 // Initializes the espClient. You should change the espClient name if you have multiple ESPs running in your home automation system
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-#ifndef D5
+/*#ifndef D5
 #if defined(ESP8266)
 #define D5 (14)
 #define D6 (12)
@@ -42,7 +51,9 @@ PubSubClient client(espClient);
 #define BAUD_RATE 9600
 #endif
 
-SoftwareSerial swSer;
+SoftwareSerial swSer;*/
+byte relON[] = {0xA0, 0x01, 0x01, 0xA2};  //Hex command to send to serial for open relay
+byte relOFF[] = {0xA0, 0x01, 0x00, 0xA1}; //Hex command to send to serial for close relay
 
 byte stav = 0;       // Aktuálny stav relé
 
@@ -80,10 +91,12 @@ void callback(String topic, byte* message, unsigned int length) {
       byte new_state = 128;
       if (messageTemp == "on") {
         new_state = 1;
-        swSer.println("A00101A2");
+        Serial.write(relON, sizeof(relON)); // turns the relay
+        //swSer.println("A00101A2");
       } else if (messageTemp == "off") {
         new_state = 0;
-        swSer.println("A00100A1");
+        Serial.write(relOFF, sizeof(relOFF)); // turns the relay
+        //swSer.println("A00100A1");
       }
       if (new_state < 2) { // Iba ak je správne nastavený nový stav
         //Serial.print(" | nový stav:"); Serial.print(new_state);
@@ -131,10 +144,11 @@ void setup() {
   /*pinMode(rele, OUTPUT);
   digitalWrite(rele, stav);*/
 
-  Serial.begin(115200);
-  //Serial.begin(9600);
-  swSer.begin(BAUD_RATE, SWSERIAL_8N1, D5, D6, false, 95, 11);
-  swSer.println("A00100A1");
+  //Serial.begin(115200);
+  Serial.begin(9600);
+  Serial.write(relOFF, sizeof(relOFF)); // turns the relay
+  /*swSer.begin(BAUD_RATE, SWSERIAL_8N1, D5, D6, false, 95, 11);
+  swSer.println("A00100A1");*/
 
   setup_wifi();
   client.setServer(mqtt_server, 1883);

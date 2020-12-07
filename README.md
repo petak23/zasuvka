@@ -41,3 +41,4 @@ This works perfectly on a ESP8266 (Arduino environment).
 ## Odkazy a referencie:
  - [https://randomnerdtutorials.com/esp8266-pinout-reference-gpios/](https://randomnerdtutorials.com/esp8266-pinout-reference-gpios/)
  - [https://www.hackster.io/makerrelay/esp8266-wifi-5v-1-channel-relay-delay-module-iot-smart-home-e8a437](https://www.hackster.io/makerrelay/esp8266-wifi-5v-1-channel-relay-delay-module-iot-smart-home-e8a437) - hlavne diskusia pod článkom
+ - [https://www.esp8266.com/viewtopic.php?p=66327#p66327](https://www.esp8266.com/viewtopic.php?p=66327#p66327)

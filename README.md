@@ -26,7 +26,7 @@ pre verziu 1.0:
  - **PubSubClient**: [https://pubsubclient.knolleary.net/](https://pubsubclient.knolleary.net/)
 
 ## Použitý relé modul:
- - [Relé modul s WiFi ESP8266](https://techfun.sk/produkt/rele-modul-s-wifi-esp8266/)
+ - [Relé modul s WiFi ESP8266](https://techfun.sk/produkt/rele-modul-s-wifi-esp8266/) [![foto](include/rele-modul-s-wifi-esp8266-foto.jpg)](https://techfun.sk/produkt/rele-modul-s-wifi-esp8266/)
  
 ## Schéma modulu:
 ![schéma relé modulu s wifi esp8266](include/rele-modul-s-wifi-esp8266-schema.jpg)

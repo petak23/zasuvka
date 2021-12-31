@@ -6,7 +6,7 @@
  * @copyright  Copyright (c) 2016 - 2021 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version 1.0.4
+ * @version 1.0.5
  * 
  * @help https://www.hackster.io/makerrelay/esp8266-wifi-5v-1-channel-relay-delay-module-iot-smart-home-e8a437 - v diskusii:
  * Michaela Merz
@@ -37,14 +37,6 @@ byte relOFF[] = {0xA0, 0x01, 0x00, 0xA1}; // Rozopnutie relé
 
 byte stav = 0;       // Aktuálny stav relé
 
-void log(String logMessage) {
-  //pvst.setTime(timeClient.getEpochTime());
-  //String tmp = pvst.getFormDT() + " -> " + logMessage;
-  //JSONVar myArray;
-  //myArray["logbook"] = tmp;
-  //webs.textAll(JSON.stringify(myArray));
-}
-
 void connectToWifi() {
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 }
@@ -64,25 +56,17 @@ void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
 
 void onMqttConnect(bool sessionPresent) {
   mqtt_state = 1;                   // Nastav príznak MQTT spojenia
-  //notifyClients(getOutputStates()); // Aktualizuj stavy webu
-
   // Prihlásenie sa na odber:
   mqttClient.subscribe(main_topic_set, 1);
 
-  log("Connected to MQTT.");
 }
 
+
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
-  log("Disconnected from MQTT.");
   mqtt_state = 0;                   // Nastav príznak chýbajúceho MQTT spojenia
-  //notifyClients(getOutputStates()); // Aktualizuj stavy webu
   if (WiFi.isConnected()) {
     mqttReconnectTimer.once(2, connectToMqtt);
   }
-}
-
-void onMqttPublish(uint16_t packetId) {
-  log("Publish acknowledged. PacketId: " + String(packetId));
 }
 
 /* Táto funkcia sa spustí ak nejaké zariadenie publikovalo správu s "topic", pre ktoré je moje ESP8266
@@ -93,7 +77,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     messageTemp += (char)payload[i];
   }
   String topicTmp;
-  for (int i = 0; i < strlen(topic); i++) {
+  for (int i = 0; i < int(strlen(topic)); i++) {
     topicTmp += (char)topic[i];
   }
 
@@ -125,9 +109,6 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   }
 }
 
-
-
-
 void setup() {
   Serial.begin(9600); // Nastav rýchlosť sériovej komunikácie na 9600 lebo na doske relé
                       // je ďaľší procesor STC15F104W, ktorý pracuje len s touto rýchlosťou.
@@ -139,7 +120,6 @@ void setup() {
   mqttClient.onConnect(onMqttConnect);
   mqttClient.onDisconnect(onMqttDisconnect);
   mqttClient.onMessage(onMqttMessage);
-  mqttClient.onPublish(onMqttPublish);
   mqttClient.setServer(MQTT_HOST, MQTT_PORT);
   mqttClient.setCredentials(MQTT_USER, MQTT_PASSWORD); 
 

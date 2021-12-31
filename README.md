@@ -23,10 +23,10 @@ pre verziu 1.0:
 **message** = "on|off"
 
 ## Odkazy na použité knižnice:   
- - **PubSubClient**: [https://pubsubclient.knolleary.net/](https://pubsubclient.knolleary.net/)
+ - **AsyncMqttClient vo verzii 0.9.0**: [https://github.com/marvinroger/async-mqtt-client?utm_source=platformio&utm_medium=piohome](https://github.com/marvinroger/async-mqtt-client?utm_source=platformio&utm_medium=piohome)
 
 ## Použitý relé modul:
- - [Relé modul s WiFi ESP8266](https://techfun.sk/produkt/rele-modul-s-wifi-esp8266/) [![foto](include/rele-modul-s-wifi-esp8266-foto.jpg)](https://techfun.sk/produkt/rele-modul-s-wifi-esp8266/)
+ - [Relé modul s WiFi ESP8266 napr. z tecfun.sk](https://techfun.sk/produkt/rele-modul-s-wifi-esp8266/) [![foto](include/rele-modul-s-wifi-esp8266-foto.jpg)](https://techfun.sk/produkt/rele-modul-s-wifi-esp8266/)
  
 ## Schéma modulu:
 ![schéma relé modulu s wifi esp8266](include/rele-modul-s-wifi-esp8266-schema.jpg)
@@ -45,3 +45,4 @@ This works perfectly on a ESP8266 (Arduino environment).
  - [https://randomnerdtutorials.com/esp8266-pinout-reference-gpios/](https://randomnerdtutorials.com/esp8266-pinout-reference-gpios/)
  - [https://www.hackster.io/makerrelay/esp8266-wifi-5v-1-channel-relay-delay-module-iot-smart-home-e8a437](https://www.hackster.io/makerrelay/esp8266-wifi-5v-1-channel-relay-delay-module-iot-smart-home-e8a437) - hlavne diskusia pod článkom
  - [https://www.esp8266.com/viewtopic.php?p=66327#p66327](https://www.esp8266.com/viewtopic.php?p=66327#p66327)
+ - [Relé modul s WiFi ESP8266 z tecfun.sk](https://techfun.sk/produkt/rele-modul-s-wifi-esp8266/) 

@@ -1,12 +1,12 @@
 /* 
  * Program pre zásuvku spínanú cez relé pomocou ESP8266 a MQTT pre IoT
  *
- * Posledna zmena(last change): 02.12.2020
+ * Posledna zmena(last change): 31.12.2021
  * @author Ing. Peter VOJTECH ml. <petak23@gmail.com>
- * @copyright  Copyright (c) 2016 - 2020 Ing. Peter VOJTECH ml.
+ * @copyright  Copyright (c) 2016 - 2021 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version 1.0.3
+ * @version 1.0.4
  * 
  * @help https://www.hackster.io/makerrelay/esp8266-wifi-5v-1-channel-relay-delay-module-iot-smart-home-e8a437 - v diskusii:
  * Michaela Merz
@@ -19,16 +19,17 @@
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-#include <PubSubClient.h>
+#include <Ticker.h>
+#include <AsyncMqttClient.h>
 #include "definitions.h"
 
-/* Initializácia espClient. 
- * Každé zariadenie pripojené k mqtt brokeru musí mať špecifické meno.
- * Meno je uložené v súbore definitions.h */ 
-WiFiClient espClient;
-PubSubClient client(espClient);
+AsyncMqttClient mqttClient;
+Ticker mqttReconnectTimer;
+int mqtt_state = 0;          // Stav MQTT pripojenia podľa https://pubsubclient.knolleary.net/api#state
 
+WiFiEventHandler wifiConnectHandler;
+WiFiEventHandler wifiDisconnectHandler;
+Ticker wifiReconnectTimer;
 
 /* Hex príkazy posielané po sériovej linke */
 byte relON[] = {0xA0, 0x01, 0x01, 0xA2};  // Zopnutie relé
@@ -36,25 +37,67 @@ byte relOFF[] = {0xA0, 0x01, 0x00, 0xA1}; // Rozopnutie relé
 
 byte stav = 0;       // Aktuálny stav relé
 
-/* Pripojenie ESP8266 k routeru */
-void setup_wifi() {
-  delay(10);
-  
-  WiFi.begin(ssid, password); 
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+void log(String logMessage) {
+  //pvst.setTime(timeClient.getEpochTime());
+  //String tmp = pvst.getFormDT() + " -> " + logMessage;
+  //JSONVar myArray;
+  //myArray["logbook"] = tmp;
+  //webs.textAll(JSON.stringify(myArray));
+}
+
+void connectToWifi() {
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+}
+
+void connectToMqtt() {
+  mqttClient.connect();
+}
+
+void onWifiConnect(const WiFiEventStationModeGotIP& event) {
+  connectToMqtt();
+}
+
+void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
+  mqttReconnectTimer.detach(); // ensure we don't reconnect to MQTT while reconnecting to Wi-Fi
+  wifiReconnectTimer.once(2, connectToWifi);
+}
+
+void onMqttConnect(bool sessionPresent) {
+  mqtt_state = 1;                   // Nastav príznak MQTT spojenia
+  //notifyClients(getOutputStates()); // Aktualizuj stavy webu
+
+  // Prihlásenie sa na odber:
+  mqttClient.subscribe(main_topic_set, 1);
+
+  log("Connected to MQTT.");
+}
+
+void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
+  log("Disconnected from MQTT.");
+  mqtt_state = 0;                   // Nastav príznak chýbajúceho MQTT spojenia
+  //notifyClients(getOutputStates()); // Aktualizuj stavy webu
+  if (WiFi.isConnected()) {
+    mqttReconnectTimer.once(2, connectToMqtt);
   }
+}
+
+void onMqttPublish(uint16_t packetId) {
+  log("Publish acknowledged. PacketId: " + String(packetId));
 }
 
 /* Táto funkcia sa spustí ak nejaké zariadenie publikovalo správu s "topic", pre ktoré je moje ESP8266
  * prihlásené na odber */
-void callback(String topic, byte* message, unsigned int length) {
+void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
   String messageTemp;
-  for (unsigned int i = 0; i < length; i++) {
-    messageTemp += (char)message[i];
+  for (unsigned int i = 0; i < len; i++) {
+    messageTemp += (char)payload[i];
+  }
+  String topicTmp;
+  for (int i = 0; i < strlen(topic); i++) {
+    topicTmp += (char)topic[i];
   }
 
-  if(topic.startsWith(main_topic_set)){  // Ak mám topic na nastavovanie
+  if(topicTmp.startsWith(main_topic_set)){  // Ak mám topic na nastavovanie
     String pub_msg = "";
 
     if (messageTemp == "stav") { // Priprav správu aktuálneho stavu na publikovanie 
@@ -77,39 +120,32 @@ void callback(String topic, byte* message, unsigned int length) {
     if (l > 1) {                  // Ak je čo tak publikuj
       char tmp[l];
       pub_msg.toCharArray(tmp, l);
-      client.publish(main_topic_get, tmp);  
+      mqttClient.publish(main_topic_get, 0, true, tmp);  
     }
   }
 }
 
-/* Táto funkcia opätovne pripojí ESP8266 k MQTT broker-u
- * a prihlási sa na odber správ(subscribe) pre ESP8266 */
-void reconnect() {
-  
-  while (!client.connected()) {
-    if (client.connect(mqtt_client, mqtt_broker, mqtt_password)) { //Pripojenie
-      client.subscribe(main_topic_set);
-    } else {
-      delay(5000);       // Čakaj 5 s pred opätovným pokusom o pripojenie
-    }
-  }
-}
+
+
 
 void setup() {
   Serial.begin(9600); // Nastav rýchlosť sériovej komunikácie na 9600 lebo na doske relé
                       // je ďaľší procesor STC15F104W, ktorý pracuje len s touto rýchlosťou.
   Serial.write(relOFF, sizeof(relOFF)); // Vypni relé
 
-  setup_wifi();       // pripoj wifi
-  client.setServer(mqtt_server, 1883); // nastav mqtt server
-  client.setCallback(callback);         
+  wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
+  wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
+
+  mqttClient.onConnect(onMqttConnect);
+  mqttClient.onDisconnect(onMqttDisconnect);
+  mqttClient.onMessage(onMqttMessage);
+  mqttClient.onPublish(onMqttPublish);
+  mqttClient.setServer(MQTT_HOST, MQTT_PORT);
+  mqttClient.setCredentials(MQTT_USER, MQTT_PASSWORD); 
+
+  connectToWifi();    
 }
 
 void loop() {
-  if (!client.connected()) {
-    reconnect();
-  }
-  if(!client.loop()) {
-    client.connect(mqtt_client, mqtt_broker, mqtt_password);
-  }
+  
 }

@@ -26,7 +26,10 @@ pre verziu 1.0:
  - **PubSubClient**: [https://pubsubclient.knolleary.net/](https://pubsubclient.knolleary.net/)
 
 ## Použitý relé modul:
- - [Relé modul s WiFi ESP8266](https://techfun.sk/produkt/rele-modul-s-wifi-esp8266/)
+ - [Relé modul s WiFi ESP8266](https://techfun.sk/produkt/rele-modul-s-wifi-esp8266/) [![foto](include/rele-modul-s-wifi-esp8266-foto.jpg)](https://techfun.sk/produkt/rele-modul-s-wifi-esp8266/)
+ 
+## Schéma modulu:
+![schéma relé modulu s wifi esp8266](include/rele-modul-s-wifi-esp8266-schema.jpg)
 
 ## Nosná časť kódu pre spínanie relé:
 [Michaela Merz](https://www.hackster.io/mischmerz)   
@@ -41,3 +44,4 @@ This works perfectly on a ESP8266 (Arduino environment).
 ## Odkazy a referencie:
  - [https://randomnerdtutorials.com/esp8266-pinout-reference-gpios/](https://randomnerdtutorials.com/esp8266-pinout-reference-gpios/)
  - [https://www.hackster.io/makerrelay/esp8266-wifi-5v-1-channel-relay-delay-module-iot-smart-home-e8a437](https://www.hackster.io/makerrelay/esp8266-wifi-5v-1-channel-relay-delay-module-iot-smart-home-e8a437) - hlavne diskusia pod článkom
+ - [https://www.esp8266.com/viewtopic.php?p=66327#p66327](https://www.esp8266.com/viewtopic.php?p=66327#p66327)
